@@ -1,3 +1,5 @@
+import { Prisma } from "database";
+
 export interface RegisterBody {
   id: string;
   name: string;
@@ -11,3 +13,6 @@ export interface RegisterResponseData {
   email: string;
   displayName: string;
 }
+
+
+export type GetUserResponseData = Prisma.UserGetPayload<{}>;

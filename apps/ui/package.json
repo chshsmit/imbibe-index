@@ -10,9 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@mantine/form": "^7.1.7",
     "@nextui-org/react": "^2.1.13",
     "@tabler/icons-react": "^2.40.0",
+    "@tanstack/react-query": "^5.0.5",
+    "axios": "^1.6.0",
+    "firebase": "^10.5.2",
     "framer-motion": "^10.16.4",
+    "imbibe-index-types": "*",
     "next-themes": "^0.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
