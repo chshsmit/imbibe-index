@@ -2,6 +2,7 @@ import CocktailGlass from "../../assets/vectors/CocktailGlass";
 
 interface LogoProps {
   onClick?: () => void;
+  className?: string;
 }
 
 const Logo = (props: LogoProps): JSX.Element => (

@@ -16,38 +16,43 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import Authentication from "../Authentication";
 import Logo from "../Logo";
 import links from "./_navItems";
 
-const navItems = ["Features", "Customers", "Integrations"];
-
 const Navigation = (): JSX.Element => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const { isSignedIn, logOut, userData } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  // TODO: Configure userData in dropdown menu
+  const basePath = location.pathname.split("/").slice(0, 2).join("/");
+
   return (
     <>
-      <Navbar onMenuOpenChange={setIsMenuOpen}>
+      <Navbar onMenuOpenChange={setIsMenuOpen} isBordered>
         <NavbarContent>
           <NavbarMenuToggle
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
             className="sm:hidden"
           />
           <NavbarBrand>
-            <Logo />
+            <Logo onClick={() => navigate("/")} />
             <p className="font-bold text-inherit">Imbibe Index</p>
           </NavbarBrand>
         </NavbarContent>
 
-        <NavbarContent className="hidden sm:flex gap-8" justify="center">
+        <NavbarContent className="hidden sm:flex gap-4" justify="center">
           {links.map((link) => (
-            <NavbarItem key={link.to}>
-              <Link color="foreground" href="#">
-                {/* {<link.icon />} */}
+            <NavbarItem key={link.to} isActive={basePath === link.to}>
+              <Link
+                className="cursor-pointer"
+                color={basePath === link.to ? "primary" : "foreground"}
+                onPress={() => navigate(link.to)}
+              >
                 {link.label}
               </Link>
             </NavbarItem>
@@ -55,27 +60,23 @@ const Navigation = (): JSX.Element => {
         </NavbarContent>
 
         <NavbarMenu>
-          {navItems.map((item, index) => (
-            <NavbarMenuItem key={`${item}-${index}`}>
+          {links.map((link) => (
+            <NavbarMenuItem key={`${link.label}`}>
               <Link
-                color={
-                  index === 2
-                    ? "primary"
-                    : index === navItems.length - 1
-                    ? "danger"
-                    : "foreground"
-                }
-                className="w-full"
-                href="#"
+                color={basePath === link.to ? "primary" : "foreground"}
+                className="w-full cursor-pointer"
                 size="lg"
+                onPress={() => {
+                  navigate(link.to);
+                }}
               >
-                {item}
+                {link.label}
               </Link>
             </NavbarMenuItem>
           ))}
         </NavbarMenu>
 
-        {isSignedIn ? (
+        {isSignedIn && userData ? (
           <NavbarContent as="div" justify="end">
             <Dropdown placement="bottom-end">
               <DropdownTrigger>
