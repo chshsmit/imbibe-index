@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@mantine/form": "^7.1.7",
     "@nextui-org/react": "^2.1.13",
     "@tabler/icons-react": "^2.40.0",
     "@tanstack/react-query": "^5.0.5",

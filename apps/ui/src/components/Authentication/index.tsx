@@ -14,10 +14,9 @@ import {
   signInWithEmailAndPassword
 } from "firebase/auth";
 import { useState } from "react";
-import { SubmitHandler } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import axiosClient from "../../api/axiosClient";
 import { auth } from "../../firebase";
-import useAuthForm from "./useAuthForm";
 
 interface AuthenticationProps {
   isOpen: boolean;
@@ -35,25 +34,24 @@ type AuthFormInputs = {
 
 const Authentication = ({ isOpen, onOpenChange, onClose }: AuthenticationProps): JSX.Element => {
 
-  // const {register, handleSubmit, reset, getFieldState, control} = useForm<AuthFormInputs>({mode: "onBlur"});
+  const {register, handleSubmit, reset, getFieldState} = useForm<AuthFormInputs>({mode: "onBlur"});
   const [error, setError] = useState<string>("");
   const [formType, setFormType] = useState<"signin" | "register">("signin");
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useAuthForm();
-
   const toggleFormType = () => {
+    reset();
     setError("");
     setFormType((current) => current === "register" ? "signin" : "register");
   };
 
   const onSubmit: SubmitHandler<AuthFormInputs> = (data) => {
     console.log(data);
-    // if (formType === "register") {
-    //   registerUser(data);
-    // } else {
-    //   signIn(data);
-    // }
+    if (formType === "register") {
+      registerUser(data);
+    } else {
+      signIn(data);
+    }
   };
 
   const registerUser = async (data: AuthFormInputs) => {
@@ -106,7 +104,7 @@ const Authentication = ({ isOpen, onOpenChange, onClose }: AuthenticationProps):
       backdrop="blur">
       <ModalContent>
         {() => (
-          <form onSubmit={form.onSubmit(values => onSubmit(values))}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <ModalHeader className="flex flex-col gap-1">
               {formType === "register" ? "Register" : "Login"}
             </ModalHeader>
@@ -118,13 +116,10 @@ const Authentication = ({ isOpen, onOpenChange, onClose }: AuthenticationProps):
                 label="Email"
                 placeholder="Enter your email"
                 variant="bordered"
-                {...form.getInputProps("email")}
-                    // isInvalid={getFieldState("email").invalid}
-                    // errorMessage={getFieldState("email").error?.message}
-
-                    // {...register("email", {required: {value: true, message: "Required"}, pattern: {value: /\S+@\S+\.\S+/, message: "Please provide a valid email"}})}
+                isInvalid={getFieldState("email").invalid}
+                errorMessage={getFieldState("email").error?.message}
+                {...register("email", {required: {value: true, message: "Required"}, pattern: {value: /\S+@\S+\.\S+/, message: "Please provide a valid email"}})}
               />
-
               {formType === "register" && (
                 <Input
                   disabled={isLoading}
@@ -132,7 +127,7 @@ const Authentication = ({ isOpen, onOpenChange, onClose }: AuthenticationProps):
                   label="Name"
                   placeholder="Your Name"
                   variant="bordered"
-                  // {...register("name", {required: true})}
+                  {...register("name", {required: true})}
                 />
               )}
               {formType === "register" && (
@@ -142,7 +137,7 @@ const Authentication = ({ isOpen, onOpenChange, onClose }: AuthenticationProps):
                   label="Display Name"
                   placeholder="Enter your display name"
                   variant="bordered"
-                  // {...register("displayName", {required: true})}
+                  {...register("displayName", {required: true})}
                 />
               )}
               <Input
@@ -152,7 +147,7 @@ const Authentication = ({ isOpen, onOpenChange, onClose }: AuthenticationProps):
                 placeholder="Enter your password"
                 type="password"
                 variant="bordered"
-                // {...register("password", {required: true, minLength: 8})}
+                {...register("password", {required: true, minLength: 8})}
               />
               {formType === "register" && (
                 <Input
@@ -162,7 +157,7 @@ const Authentication = ({ isOpen, onOpenChange, onClose }: AuthenticationProps):
                   placeholder="Confirm your password"
                   type="password"
                   variant="bordered"
-                  // {...register("confirmPassword", {required: true})}
+                  {...register("confirmPassword", {required: true})}
                 />
               )}
 
