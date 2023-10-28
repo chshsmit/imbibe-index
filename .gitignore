@@ -37,3 +37,6 @@ yarn-error.log*
 
 # service accounts
 serviceAccountCredentials.json
+
+# random
+run.sh
