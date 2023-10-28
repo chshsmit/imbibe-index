@@ -1,15 +1,16 @@
-import { Button } from "@nextui-org/react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Layout from "./components/Layout";
+import Home from "./pages/Home";
 
 function App() {
-
   return (
-    <>
-      <div>
-        <Button color="primary">
-          Button
-        </Button>
-      </div>
-    </>
+    <BrowserRouter>
+      <Layout>
+        <Routes>
+          <Route path="/" Component={Home} />
+        </Routes>
+      </Layout>
+    </BrowserRouter>
   );
 }
 
