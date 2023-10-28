@@ -1,4 +1,4 @@
-import { useForm } from "@mantine/form";
+import { useForm } from "react-hook-form";
 
 type AuthFormInputs = {
   name: string;
@@ -9,17 +9,5 @@ type AuthFormInputs = {
 }
 
 export default function useAuthForm() {
-  return useForm<AuthFormInputs>({
-    initialValues: {
-      name: "",
-      email: "",
-      displayName: "",
-      password: "",
-      confirmPassword: ""
-    },
-
-    validate: {
-      email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email")
-    }
-  });
+  return useForm<AuthFormInputs>();
 }

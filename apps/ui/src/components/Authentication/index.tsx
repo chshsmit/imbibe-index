@@ -6,12 +6,12 @@ import {
   ModalBody,
   ModalContent,
   ModalFooter,
-  ModalHeader
+  ModalHeader,
 } from "@nextui-org/react";
 import {
   AuthErrorCodes,
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
 } from "firebase/auth";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -30,11 +30,20 @@ type AuthFormInputs = {
   displayName: string;
   password: string;
   confirmPassword: string;
-}
+};
 
-const Authentication = ({ isOpen, onOpenChange, onClose }: AuthenticationProps): JSX.Element => {
-
-  const {register, handleSubmit, reset, getFieldState} = useForm<AuthFormInputs>({mode: "onBlur"});
+const Authentication = ({
+  isOpen,
+  onOpenChange,
+  onClose,
+}: AuthenticationProps): JSX.Element => {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+    getValues,
+  } = useForm<AuthFormInputs>({ mode: "onBlur" });
   const [error, setError] = useState<string>("");
   const [formType, setFormType] = useState<"signin" | "register">("signin");
   const [isLoading, setIsLoading] = useState(false);
@@ -42,11 +51,10 @@ const Authentication = ({ isOpen, onOpenChange, onClose }: AuthenticationProps):
   const toggleFormType = () => {
     reset();
     setError("");
-    setFormType((current) => current === "register" ? "signin" : "register");
+    setFormType((current) => (current === "register" ? "signin" : "register"));
   };
 
   const onSubmit: SubmitHandler<AuthFormInputs> = (data) => {
-    console.log(data);
     if (formType === "register") {
       registerUser(data);
     } else {
@@ -61,23 +69,25 @@ const Authentication = ({ isOpen, onOpenChange, onClose }: AuthenticationProps):
         const user = userCredential.user;
         const userId = user.uid;
 
-        axiosClient.post("/user/register", {
-          id: userId,
-          name: data.name,
-          email: data.email,
-          displayName: data.displayName
-        })
-        .then(() => onClose())
-        .catch((err) => {
-          console.error("Something happened", err);
-        });
-      }).catch((error) => {
+        axiosClient
+          .post("/user/register", {
+            id: userId,
+            name: data.name,
+            email: data.email,
+            displayName: data.displayName,
+          })
+          .then(() => onClose())
+          .catch((err) => {
+            console.error("Something happened", err);
+          });
+      })
+      .catch((error) => {
         if (error.code === AuthErrorCodes.EMAIL_EXISTS) {
           setError("User with that email already exists");
         }
-      }).finally(() => setIsLoading(false));
+      })
+      .finally(() => setIsLoading(false));
   };
-
 
   const signIn = (data: AuthFormInputs) => {
     console.log("Signing in");
@@ -85,23 +95,29 @@ const Authentication = ({ isOpen, onOpenChange, onClose }: AuthenticationProps):
 
     setIsLoading(true);
     signInWithEmailAndPassword(auth, data.email, data.password)
-    .then(() => onClose())
-    .catch((error) => {
-      console.log(error);
-      if (error.code === "auth/invalid-login-credentials") {
-        setError("We could not find an account with that email and password");
-      }
-    })
-    .finally(() => {
-      setIsLoading(false);
-    });
-
+      .then(() => onClose())
+      .catch((error) => {
+        console.log(error);
+        if (error.code === "auth/invalid-login-credentials") {
+          setError("We could not find an account with that email and password");
+        }
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
-
   return (
-    <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="top"
-      backdrop="blur">
+    <Modal
+      isOpen={isOpen}
+      onOpenChange={() => {
+        onOpenChange();
+        reset();
+        setFormType("signin");
+      }}
+      placement="top"
+      backdrop="blur"
+    >
       <ModalContent>
         {() => (
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -112,13 +128,18 @@ const Authentication = ({ isOpen, onOpenChange, onClose }: AuthenticationProps):
               <Input
                 disabled={isLoading}
                 isRequired
-                autoFocus
                 label="Email"
                 placeholder="Enter your email"
                 variant="bordered"
-                isInvalid={getFieldState("email").invalid}
-                errorMessage={getFieldState("email").error?.message}
-                {...register("email", {required: {value: true, message: "Required"}, pattern: {value: /\S+@\S+\.\S+/, message: "Please provide a valid email"}})}
+                isInvalid={errors.email !== undefined}
+                errorMessage={errors.email && errors.email.message}
+                {...register("email", {
+                  required: { value: true, message: "Required" },
+                  pattern: {
+                    value: /\S+@\S+\.\S+/,
+                    message: "Please provide a valid email",
+                  },
+                })}
               />
               {formType === "register" && (
                 <Input
@@ -127,7 +148,11 @@ const Authentication = ({ isOpen, onOpenChange, onClose }: AuthenticationProps):
                   label="Name"
                   placeholder="Your Name"
                   variant="bordered"
-                  {...register("name", {required: true})}
+                  isInvalid={errors.name !== undefined}
+                  errorMessage={errors.name && errors.name.message}
+                  {...register("name", {
+                    required: { value: true, message: "Please provide a name" },
+                  })}
                 />
               )}
               {formType === "register" && (
@@ -137,7 +162,16 @@ const Authentication = ({ isOpen, onOpenChange, onClose }: AuthenticationProps):
                   label="Display Name"
                   placeholder="Enter your display name"
                   variant="bordered"
-                  {...register("displayName", {required: true})}
+                  isInvalid={errors.displayName !== undefined}
+                  errorMessage={
+                    errors.displayName && errors.displayName.message
+                  }
+                  {...register("displayName", {
+                    required: {
+                      value: true,
+                      message: "Please provide your display name.",
+                    },
+                  })}
                 />
               )}
               <Input
@@ -147,7 +181,15 @@ const Authentication = ({ isOpen, onOpenChange, onClose }: AuthenticationProps):
                 placeholder="Enter your password"
                 type="password"
                 variant="bordered"
-                {...register("password", {required: true, minLength: 8})}
+                isInvalid={errors.password !== undefined}
+                errorMessage={errors.password && errors.password.message}
+                {...register("password", {
+                  required: true,
+                  minLength: {
+                    value: 8,
+                    message: "Password must be at least 8 characters",
+                  },
+                })}
               />
               {formType === "register" && (
                 <Input
@@ -157,7 +199,18 @@ const Authentication = ({ isOpen, onOpenChange, onClose }: AuthenticationProps):
                   placeholder="Confirm your password"
                   type="password"
                   variant="bordered"
-                  {...register("confirmPassword", {required: true})}
+                  isInvalid={errors.confirmPassword !== undefined}
+                  errorMessage={
+                    errors.confirmPassword && errors.confirmPassword.message
+                  }
+                  {...register("confirmPassword", {
+                    required: true,
+                    validate: {
+                      isSameAsPassword: (value) =>
+                        value === getValues().password ||
+                        "Passwords must match",
+                    },
+                  })}
                 />
               )}
 
@@ -168,23 +221,25 @@ const Authentication = ({ isOpen, onOpenChange, onClose }: AuthenticationProps):
               )}
 
               <div className="flex py-2 px-1 justify-between">
-                <Link className="cursor-pointer" color="primary" size="sm"
-                  onPress={toggleFormType}>
-                  {formType === "signin" ?
-                  ("Don't have an account? Register!")
-                  : ("Already have an account? Sign in!")}
+                <Link
+                  className="cursor-pointer"
+                  color="primary"
+                  size="sm"
+                  onPress={toggleFormType}
+                >
+                  {formType === "signin"
+                    ? "Don't have an account? Register!"
+                    : "Already have an account? Sign in!"}
                 </Link>
               </div>
             </ModalBody>
             <ModalFooter>
               <Button color="primary" type="submit" isLoading={isLoading}>
-                {formType === "signin" ?
-                  ("Sign in")
-                  : ("Register")}
+                {formType === "signin" ? "Sign in" : "Register"}
               </Button>
             </ModalFooter>
           </form>
-          )}
+        )}
       </ModalContent>
     </Modal>
   );
