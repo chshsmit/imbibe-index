@@ -35,12 +35,21 @@ export const registerUser = expressAsyncHandler(
 
     let user;
     try {
+      // Create the user and their root collection
       user = await prisma.user.create({
         data: {
           id,
           name,
           displayName,
-          email
+          email,
+          collections: {
+            create: [
+              {
+                collectionName: "Home",
+                isRootCollection: true
+              }
+            ]
+          }
         }
       });
     } catch (err) {

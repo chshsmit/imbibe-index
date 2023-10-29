@@ -11,6 +11,10 @@ export interface CustomRequest<T> extends TokenRequest {
 
 type Send<ResBody = any, T = Response<ResBody>> = (body?: ResBody) => T;
 
+interface ErrorResponse {
+  error: string;
+}
+
 export interface CustomResponse<T> extends Response {
-  json: Send<T, this>;
+  json: Send<T | ErrorResponse, this>;
 }
