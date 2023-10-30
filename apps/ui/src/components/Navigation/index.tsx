@@ -33,7 +33,7 @@ const Navigation = (): JSX.Element => {
 
   return (
     <>
-      <Navbar onMenuOpenChange={setIsMenuOpen} isBordered>
+      <Navbar onMenuOpenChange={setIsMenuOpen} isBordered maxWidth="full">
         <NavbarContent>
           <NavbarMenuToggle
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}

@@ -1,44 +1,106 @@
 import { PrismaClient } from "database";
 import expressAsyncHandler from "express-async-handler";
-import { CreateCollectionBody, CreateCollectionResponseData } from "imbibe-index-types";
-import { CustomRequest, CustomResponse } from "../../types/requests";
-
+import {
+  CollectionForUser,
+  CreateCollectionBody,
+  CreateCollectionResponseData,
+  GetCollectionsForUserResponseData,
+} from "imbibe-index-types";
+import {
+  CustomRequest,
+  CustomResponse,
+  TokenRequest,
+} from "../../types/requests";
 
 const prisma = new PrismaClient();
 
 //----------------------------------------------------------------------
 
-type CreateCollectionRequest = CustomRequest<CreateCollectionBody>;
-type CreateCollectionResponse = CustomResponse<CreateCollectionResponseData>;
-
-export const createCollection = expressAsyncHandler(
-  async (req: CreateCollectionRequest, res: CreateCollectionResponse) => {
-
-    const { name, parentCollectionId} = req.body;
-
-    if (!name) {
-      res.status(400).json({error: "You must provide a name for your collection"});
-      return;
-    } else if (!parentCollectionId) {
-      res.status(400).json({error: "You must provide the parent collection"});
-      return;
-    }
-
-    const parentCollection = await prisma.collection.findUnique({
+export type GetCollectionsForUserResponse =
+  CustomResponse<GetCollectionsForUserResponseData>;
+export const getCollectionsForUser = expressAsyncHandler(
+  async (req: TokenRequest, res: GetCollectionsForUserResponse) => {
+    const allCollectionsForUser = await prisma.collection.findMany({
       where: {
-        id: Number(parentCollectionId),
+        userId: req.user!.user_id,
+      },
+      include: {
+        recipes: {
+          include: {
+            tags: {
+              include: {
+                tag: {
+                  select: {
+                    id: true,
+                    tagName: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        subCollections: {
+          select: {
+            id: true,
+            collectionName: true,
+          },
+        },
       },
     });
 
-    if (!parentCollection) {
-      res.status(404).json({error: `There is no collection with the id [${parentCollectionId}]`});
+    const collections: Record<number, CollectionForUser> = {};
+    let rootCollectionId = 0;
+
+    for (const collection of allCollectionsForUser) {
+      if (collection.isRootCollection) {
+        rootCollectionId = collection.id;
+      }
+
+      const recipes = await Promise.all(
+        collection.recipes.map(async (recipe) => {
+          // TODO: Handle images
+          return {
+            name: recipe.name,
+            id: recipe.id,
+            tags: recipe.tags.map((tag) => tag.tag.tagName),
+            imageUrl: "",
+          };
+        })
+      );
+
+      const collectionForUser: CollectionForUser = {
+        collectionName: collection.collectionName,
+        id: collection.id,
+        isRootCollection: collection.isRootCollection,
+        subCollections: collection.subCollections,
+        parentCollection: collection.parentCollectionId ?? undefined,
+        recipes,
+      };
+
+      collections[collection.id] = collectionForUser;
+    }
+
+    if (rootCollectionId === 0) {
+      res.status(404).json({
+        error:
+          "Sorry, we couldn't find the root collection. If this is unexpected, please reach out.",
+      });
       return;
     }
 
-    if (parentCollection.userId !== req.user!.user_id) {
-      res.status(403).json({error: "Access forbidden"});
-      return;
-    }
+    res.status(200).json({ collections, rootCollectionId });
+  }
+);
+
+//----------------------------------------------------------------------
+
+export type CreateCollectionRequest = CustomRequest<CreateCollectionBody>;
+export type CreateCollectionResponse =
+  CustomResponse<CreateCollectionResponseData>;
+
+export const createCollection = expressAsyncHandler(
+  async (req: CreateCollectionRequest, res: CreateCollectionResponse) => {
+    const { name, parentCollectionId } = req.body;
 
     const newCollection = await prisma.collection.create({
       data: {
@@ -57,9 +119,12 @@ export const createCollection = expressAsyncHandler(
       });
       return;
     } else {
-      res.status(400).json({error: "Something went wrong creating the new collection"});
+      res
+        .status(400)
+        .json({ error: "Something went wrong creating the new collection" });
       return;
     }
-
   }
 );
+
+//----------------------------------------------------------------------

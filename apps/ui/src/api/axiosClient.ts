@@ -10,6 +10,7 @@ const getUserToken = async () => {
     const unsub = auth.onAuthStateChanged(async (user) => {
       if (user) {
         const token = await user.getIdToken();
+        console.log({ token });
         resolve(token);
       } else {
         resolve(null);

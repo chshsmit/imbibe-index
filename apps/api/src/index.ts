@@ -1,5 +1,6 @@
 import cors from "cors";
 import express, { Request, Response } from "express";
+import CollectionRouter from "./routes/collection/routes";
 import UserRouter from "./routes/user/routes";
 
 const app = express();
@@ -17,11 +18,11 @@ app.use(cors());
 // ---------------------------------------------
 
 app.use("/user", UserRouter);
+app.use("/collection", CollectionRouter);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, express with typescript");
 });
-
 
 // ---------------------------------------------
 // Start
