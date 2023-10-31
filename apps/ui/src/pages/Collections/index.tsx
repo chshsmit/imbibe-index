@@ -1,4 +1,5 @@
-import { Button, Spinner } from "@nextui-org/react";
+import { Card, CardBody, Spinner } from "@nextui-org/react";
+import { IconCaretRight } from "@tabler/icons-react";
 import NotFound from "../../components/NotFound";
 import CollectionHeader from "./_collectionHeader";
 import CollectionsBreadcrumbs from "./_collectionsBreadCrumbs";
@@ -30,14 +31,22 @@ const Collections = (): JSX.Element => {
         setCollection={setCurrentCollection}
       />
       <CollectionHeader currentCollection={currentCollection} />
-      {currentCollection.subCollections.map((item) => (
-        <Button
-          key={item.id}
-          onPress={() => setCurrentCollection(userCollections![item.id])}
-        >
-          {item.collectionName}
-        </Button>
-      ))}
+      <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4">
+        {currentCollection.subCollections.map((item) => (
+          <Card
+            key={item.id}
+            isPressable
+            onPress={() => setCurrentCollection(userCollections![item.id])}
+          >
+            <CardBody>
+              <div className="flex justify-between items-center">
+                {item.collectionName}
+                <IconCaretRight size={14} />
+              </div>
+            </CardBody>
+          </Card>
+        ))}
+      </div>
     </>
   );
 };
