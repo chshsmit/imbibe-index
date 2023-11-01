@@ -12,6 +12,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CollectionForUser } from "imbibe-index-types";
 import { useForm } from "react-hook-form";
 import createCollection from "../../../api/mutations/createCollection";
+import createRecipe from "../../../api/mutations/createRecipe";
 
 interface CreateModalProps {
   isOpen: boolean;
@@ -45,6 +46,14 @@ export default function CreateModal({
     },
   });
 
+  const createRecipeMutation = useMutation({
+    mutationFn: createRecipe,
+    onSuccess: () => {
+      onClose();
+      queryClient.invalidateQueries({ queryKey: ["userCollections"] });
+    },
+  });
+
   const onSubmit = (data: CreateRecipeOrCollectionInputs) => {
     console.log("submitting");
     if (createType === "collection") {
@@ -52,7 +61,13 @@ export default function CreateModal({
         ...data,
         parentCollectionId: currentCollection.id,
       });
-      console.log("creating collection");
+    }
+
+    if (createType === "recipe") {
+      createRecipeMutation.mutate({
+        ...data,
+        collectionId: currentCollection.id,
+      });
     }
   };
 

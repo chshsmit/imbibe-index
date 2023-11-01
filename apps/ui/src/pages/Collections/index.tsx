@@ -23,6 +23,8 @@ const Collections = (): JSX.Element => {
     return <NotFound />;
   }
 
+  console.log(userCollections);
+
   return (
     <>
       <CollectionsBreadcrumbs
