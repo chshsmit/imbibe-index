@@ -90,14 +90,10 @@ const Authentication = ({
   };
 
   const signIn = (data: AuthFormInputs) => {
-    console.log("Signing in");
-    console.log(data);
-
     setIsLoading(true);
     signInWithEmailAndPassword(auth, data.email, data.password)
       .then(() => onClose())
       .catch((error) => {
-        console.log(error);
         if (error.code === "auth/invalid-login-credentials") {
           setError("We could not find an account with that email and password");
         }

@@ -7,7 +7,6 @@ import axiosClient from "../../api/axiosClient";
 import { ApiError } from "../../api/types";
 import { auth } from "../../firebase";
 
-
 interface UseAuthReturnValues {
   isSignedIn: boolean;
   pending: boolean;
@@ -16,7 +15,6 @@ interface UseAuthReturnValues {
   userData: GetUserResponseData;
   logOut: () => void;
 }
-
 
 export function useAuth(): UseAuthReturnValues {
   const [authState, setAuthState] = useState<any>({
@@ -33,7 +31,7 @@ export function useAuth(): UseAuthReturnValues {
       setAuthState({ user, pending: false, isSignedIn: !!user });
       if (user) {
         const token = await user.getIdToken();
-        console.log({token});
+        console.log({ token });
       }
       if (user) {
         refetchUser();

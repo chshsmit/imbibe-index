@@ -8,11 +8,8 @@ import {
   ModalHeader,
 } from "@nextui-org/react";
 import { IconPlus } from "@tabler/icons-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CollectionForUser } from "imbibe-index-types";
-import { useForm } from "react-hook-form";
-import createCollection from "../../../api/mutations/createCollection";
-import createRecipe from "../../../api/mutations/createRecipe";
+import useCreation from "./useCreation";
 
 interface CreateModalProps {
   isOpen: boolean;
@@ -33,38 +30,17 @@ export default function CreateModal({
   currentCollection,
   createType,
 }: CreateModalProps): JSX.Element {
-  const { register, handleSubmit, reset } =
-    useForm<CreateRecipeOrCollectionInputs>();
-
-  const queryClient = useQueryClient();
-
-  const createCollectionMutation = useMutation({
-    mutationFn: createCollection,
-    onSuccess: () => {
-      onClose();
-      queryClient.invalidateQueries({ queryKey: ["userCollections"] });
-    },
-  });
-
-  const createRecipeMutation = useMutation({
-    mutationFn: createRecipe,
-    onSuccess: () => {
-      onClose();
-      queryClient.invalidateQueries({ queryKey: ["userCollections"] });
-    },
-  });
+  const { createCollection, createRecipe, form } = useCreation({ onClose });
 
   const onSubmit = (data: CreateRecipeOrCollectionInputs) => {
-    console.log("submitting");
     if (createType === "collection") {
-      createCollectionMutation.mutate({
+      createCollection.mutate({
         ...data,
         parentCollectionId: currentCollection.id,
       });
     }
-
     if (createType === "recipe") {
-      createRecipeMutation.mutate({
+      createRecipe.mutate({
         ...data,
         collectionId: currentCollection.id,
       });
@@ -75,7 +51,7 @@ export default function CreateModal({
     <Modal
       isOpen={isOpen}
       onOpenChange={() => {
-        reset();
+        form.reset();
         onOpenChange();
       }}
       placement="top"
@@ -86,15 +62,17 @@ export default function CreateModal({
             <ModalHeader>
               Create {createType === "collection" ? "Collection" : "Recipe"}
             </ModalHeader>{" "}
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
               <ModalBody>
                 <Input
                   label="Name"
                   isRequired
                   variant="bordered"
                   placeholder="Enter a name"
-                  disabled={createCollectionMutation.isPending}
-                  {...register("name", { required: true })}
+                  disabled={
+                    createCollection.isPending || createRecipe.isPending
+                  }
+                  {...form.register("name", { required: true })}
                 />
               </ModalBody>
               <ModalFooter>

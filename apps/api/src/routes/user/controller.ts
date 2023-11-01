@@ -1,13 +1,19 @@
 import { PrismaClient } from "database";
 import expressAsyncHandler from "express-async-handler";
-import { GetUserResponseData, RegisterBody, RegisterResponseData } from "imbibe-index-types";
-import { CustomRequest, CustomResponse, TokenRequest } from "../../types/requests";
-
+import {
+  GetUserResponseData,
+  RegisterBody,
+  RegisterResponseData,
+} from "imbibe-index-types";
+import {
+  CustomRequest,
+  CustomResponse,
+  TokenRequest,
+} from "../../types/requests";
 
 const prisma = new PrismaClient();
 
 // --------------------------------------------------------
-
 
 type RegisterRequest = CustomRequest<RegisterBody>;
 type RegisterResponse = CustomResponse<RegisterResponseData>;
@@ -15,7 +21,6 @@ type RegisterResponse = CustomResponse<RegisterResponseData>;
 export const registerUser = expressAsyncHandler(
   async (req: RegisterRequest, res: RegisterResponse) => {
     const { id, name, email, displayName } = req.body;
-    console.log(req.body);
 
     if (!id || !email || !displayName || !name) {
       res.status(400);
@@ -24,8 +29,8 @@ export const registerUser = expressAsyncHandler(
 
     const userExists = await prisma.user.findUnique({
       where: {
-        email
-      }
+        email,
+      },
     });
 
     if (userExists) {
@@ -46,11 +51,11 @@ export const registerUser = expressAsyncHandler(
             create: [
               {
                 collectionName: "Home",
-                isRootCollection: true
-              }
-            ]
-          }
-        }
+                isRootCollection: true,
+              },
+            ],
+          },
+        },
       });
     } catch (err) {
       console.error(err);
@@ -62,7 +67,7 @@ export const registerUser = expressAsyncHandler(
       id: user.id,
       name: user.name,
       email: user.email,
-      displayName: user.displayName
+      displayName: user.displayName,
     });
   }
 );
@@ -75,8 +80,8 @@ export const getUser = expressAsyncHandler(
   async (req: TokenRequest, res: GetUserResponse) => {
     const user = await prisma.user.findUnique({
       where: {
-        id: req.user!.user_id
-      }
+        id: req.user!.user_id,
+      },
     });
 
     if (!user) {
