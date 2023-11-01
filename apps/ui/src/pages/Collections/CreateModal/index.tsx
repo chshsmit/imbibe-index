@@ -8,7 +8,7 @@ import {
   ModalHeader,
 } from "@nextui-org/react";
 import { IconPlus } from "@tabler/icons-react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CollectionForUser } from "imbibe-index-types";
 import { useForm } from "react-hook-form";
 import createCollection from "../../../api/mutations/createCollection";
@@ -30,15 +30,18 @@ export default function CreateModal({
   onOpenChange,
   onClose,
   currentCollection,
-  createType = "collection",
+  createType,
 }: CreateModalProps): JSX.Element {
   const { register, handleSubmit, reset } =
     useForm<CreateRecipeOrCollectionInputs>();
+
+  const queryClient = useQueryClient();
 
   const createCollectionMutation = useMutation({
     mutationFn: createCollection,
     onSuccess: () => {
       onClose();
+      queryClient.invalidateQueries({ queryKey: ["userCollections"] });
     },
   });
 
@@ -65,7 +68,9 @@ export default function CreateModal({
       <ModalContent>
         {() => (
           <>
-            <ModalHeader>Create Collection</ModalHeader>{" "}
+            <ModalHeader>
+              Create {createType === "collection" ? "Collection" : "Recipe"}
+            </ModalHeader>{" "}
             <form onSubmit={handleSubmit(onSubmit)}>
               <ModalBody>
                 <Input

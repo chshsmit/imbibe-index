@@ -8,6 +8,7 @@ import {
 } from "@nextui-org/react";
 import { IconPlus } from "@tabler/icons-react";
 import { CollectionForUser } from "imbibe-index-types";
+import { useState } from "react";
 import CreateModal from "./CreateModal";
 
 interface CollectionHeaderProps {
@@ -18,6 +19,9 @@ export default function CollectionHeader({
   currentCollection,
 }: CollectionHeaderProps): JSX.Element {
   const { isOpen, onOpenChange, onOpen, onClose } = useDisclosure();
+  const [creationType, setCreationType] = useState<"collection" | "recipe">(
+    "collection"
+  );
 
   return (
     <>
@@ -35,10 +39,24 @@ export default function CollectionHeader({
               </Button>
             </DropdownTrigger>
             <DropdownMenu aria-label="Collection Actions" variant="flat">
-              <DropdownItem key="collection" onPress={onOpen}>
+              <DropdownItem
+                key="collection"
+                onPress={() => {
+                  setCreationType("collection");
+                  onOpen();
+                }}
+              >
                 Add collection
               </DropdownItem>
-              <DropdownItem key="recipe">Add recipe</DropdownItem>
+              <DropdownItem
+                key="recipe"
+                onPress={() => {
+                  setCreationType("recipe");
+                  onOpen();
+                }}
+              >
+                Add recipe
+              </DropdownItem>
             </DropdownMenu>
           </Dropdown>
         </div>
@@ -50,6 +68,7 @@ export default function CollectionHeader({
         onOpenChange={onOpenChange}
         onClose={onClose}
         currentCollection={currentCollection}
+        createType={creationType}
       />
     </>
   );
