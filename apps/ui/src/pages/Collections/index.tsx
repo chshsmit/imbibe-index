@@ -1,8 +1,9 @@
-import { Card, CardBody, Spinner } from "@nextui-org/react";
+import { Card, CardBody, Divider, Spinner } from "@nextui-org/react";
 import { IconCaretRight } from "@tabler/icons-react";
 import NotFound from "../../components/NotFound";
 import CollectionHeader from "./_collectionHeader";
 import CollectionsBreadcrumbs from "./_collectionsBreadCrumbs";
+import RecipeCard from "./_recipeCard";
 import useCollectionNavigation from "./useCollectionNavigation";
 
 const Collections = (): JSX.Element => {
@@ -47,6 +48,12 @@ const Collections = (): JSX.Element => {
               </div>
             </CardBody>
           </Card>
+        ))}
+      </div>
+      <Divider className="mt-5" />
+      <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4 mt-5">
+        {currentCollection.recipes.map((item) => (
+          <RecipeCard key={item.id} />
         ))}
       </div>
     </>
