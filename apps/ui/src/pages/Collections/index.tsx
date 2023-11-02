@@ -53,7 +53,7 @@ const Collections = (): JSX.Element => {
       <Divider className="mt-5" />
       <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4 mt-5">
         {currentCollection.recipes.map((item) => (
-          <RecipeCard key={item.id} />
+          <RecipeCard key={item.id} {...item} />
         ))}
       </div>
     </>

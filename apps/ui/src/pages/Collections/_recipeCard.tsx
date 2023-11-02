@@ -1,42 +1,46 @@
 import {
+  Button,
   Card,
-  CardBody,
   CardFooter,
   CardHeader,
-  Divider,
+  Chip,
   Image,
-  Link,
 } from "@nextui-org/react";
+import placeholder from "../../assets/image2.png";
 
-export default function RecipeCard(): JSX.Element {
+interface RecipeCardProps {
+  imageUrl?: string;
+  name: string;
+  createdBy?: string;
+  id: number;
+}
+
+export default function RecipeCard({
+  imageUrl,
+  name,
+  createdBy,
+  id,
+  moreOptions,
+  tags,
+}: RecipeCardProps): JSX.Element {
+  console.log({ imageUrl, name, createdBy, id, moreOptions, tags });
+
   return (
-    <Card>
-      <CardHeader className="flex gap-3">
-        <Image
-          alt="nextui logo"
-          height={40}
-          radius="sm"
-          src="https://avatars.githubusercontent.com/u/86160567?s=200&v=4"
-          width={40}
-        />
-        <div className="flex flex-col">
-          <p className="text-md">NextUI</p>
-          <p className="text-small text-default-500">nextui.org</p>
-        </div>
+    <Card isPressable isFooterBlurred>
+      <CardHeader className="absolute z-10 top-1 flex-col items-start">
+        <Chip>Hello</Chip>
       </CardHeader>
-      <Divider />
-      <CardBody>
-        <p>Make beautiful websites regardless of your design experience.</p>
-      </CardBody>
-      <Divider />
-      <CardFooter>
-        <Link
-          isExternal
-          showAnchorIcon
-          href="https://github.com/nextui-org/nextui"
-        >
-          Visit source code on GitHub.
-        </Link>
+      <Image
+        alt="nextui logo"
+        className="z-0 w-full h-full object-cover"
+        removeWrapper
+        src={placeholder}
+      />
+      <CardFooter className="absolute flex text-white bg-black/40 bottom-0 z-10 border-t-1 border-default-600 dark:border-default-100 justify-between">
+        {name}
+        <Button color="primary" size="sm" radius="full">
+          Go
+        </Button>
       </CardFooter>
     </Card>
   );
