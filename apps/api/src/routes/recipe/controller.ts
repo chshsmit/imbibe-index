@@ -1,7 +1,15 @@
 import { PrismaClient } from "database";
 import expressAsyncHandler from "express-async-handler";
-import { CreateRecipeBody, CreateRecipeResponseData } from "imbibe-index-types";
-import { CustomRequest, CustomResponse } from "../../types/requests";
+import {
+  CreateRecipeBody,
+  CreateRecipeResponseData,
+  GetRecipeResponseData,
+} from "imbibe-index-types";
+import {
+  CustomRequest,
+  CustomResponse,
+  TokenRequest,
+} from "../../types/requests";
 
 //--------------------------------------------------------------------------------
 
@@ -49,5 +57,50 @@ export const createRecipe = expressAsyncHandler(
     }
 
     res.status(201).json({ name: newRecipe.name, id: newRecipe.id });
+  }
+);
+
+//--------------------------------------------------------------------------------
+
+export type GetRecipeResponse = CustomResponse<GetRecipeResponseData>;
+export const getRecipe = expressAsyncHandler(
+  async (req: TokenRequest, res: GetRecipeResponse) => {
+    const recipe = await prisma.recipe.findUnique({
+      where: {
+        id: Number(req.params.id),
+      },
+      include: {
+        user: {
+          select: {
+            displayName: true,
+            id: true,
+          },
+        },
+        tags: {
+          include: {
+            tag: true,
+          },
+        },
+        takes: {
+          include: {
+            ingredients: {
+              include: {
+                ingredient: true,
+              },
+            },
+            steps: true,
+          },
+        },
+        likes: true,
+        favorited: true,
+      },
+    });
+
+    if (!recipe) {
+      res.status(404).json({ error: "Sorry we could not find that recipe" });
+      return;
+    }
+
+    res.status(200).json(recipe);
   }
 );

@@ -1,7 +1,9 @@
 import express from "express";
+import includeToken from "../../middleware/include-token";
 import validateToken from "../../middleware/validate-token";
-import { createRecipe } from "./controller";
+import { createRecipe, getRecipe } from "./controller";
 import {
+  checkRecipeVisibility,
   validateCollectionOwnership,
   validateCreateRecipeParameters,
 } from "./middleware";
@@ -16,5 +18,8 @@ router.post(
   validateCollectionOwnership,
   createRecipe
 );
+
+// Getting recipe by id
+router.get("/:id", includeToken, checkRecipeVisibility, getRecipe);
 
 export default router;

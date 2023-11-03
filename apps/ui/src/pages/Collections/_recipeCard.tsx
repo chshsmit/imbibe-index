@@ -18,7 +18,7 @@ export default function RecipeCard({
   console.log({ imageUrl, name, createdBy, id });
 
   return (
-    <Card isPressable isFooterBlurred>
+    <Card isFooterBlurred>
       <Image
         alt="nextui logo"
         className="z-0 w-full h-full object-cover"
