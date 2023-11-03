@@ -1,5 +1,6 @@
 import { Button, Card, CardFooter, Image } from "@nextui-org/react";
 import { IconShare } from "@tabler/icons-react";
+import { useNavigate } from "react-router-dom";
 import placeholder from "../../assets/image1.png";
 
 interface RecipeCardProps {
@@ -16,9 +17,16 @@ export default function RecipeCard({
   id,
 }: RecipeCardProps): JSX.Element {
   console.log({ imageUrl, name, createdBy, id });
+  const navigate = useNavigate();
 
   return (
-    <Card isFooterBlurred>
+    <Card
+      isFooterBlurred
+      className="cursor-pointer"
+      isPressable
+      onPress={() => navigate(`/recipe/${id}`)}
+      as="div"
+    >
       <Image
         alt="nextui logo"
         className="z-0 w-full h-full object-cover"
